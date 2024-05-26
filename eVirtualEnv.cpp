@@ -4,33 +4,25 @@
 #include <iostream>
 #include <easylib.h>
 #include "evenv.hpp"
-#include <type_traits>
 
 evenv ev;
 
-/*
-std::ostream& operator<<(std::ostream& os, const env_item& d)
-{
-	return os << "XXX";
-}*/
-
-
 int main()
 {
-	ev.del_evenv_envpath();
+	//控制台窗口不显示时间
+	console.set_console_time(false);
 
-	//static_assert(is_equality_comparable<env_item>::value, "不支持流");
-
-	console.log("进入evenv...");
+/*
 	if (ev.is_agent_run())
 	{
-		console.log("代理运行...");
 		ev.del_evenv_envpath();
 		VERIFY(0, "代理运行.");
 	}
 	else {
 		console.log("正常运行");
-	}
+	}*/
+
+	ev.run();
 
 	process.auto_proxy_input([](eString& cmdStr)
 		{

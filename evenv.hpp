@@ -2,15 +2,6 @@
 
 using namespace easy;
 
-struct env_item {
-	std::string name;
-	std::string path;
-/*
-	bool operator==(const env_item& other) const {
-		return true;
-	}*/
-};
-
 class evenv
 {
 private:
@@ -20,8 +11,7 @@ private:
 	bool	_is_agent_run = false;
 
 	//conda虚拟环境
-	eVector<env_item> _envs_conda;
-	//eStringArray
+	eStringArray _arr_conda_envs;
 public:
 	evenv()
 	{
@@ -42,14 +32,33 @@ public:
 	//读取conda虚拟环境
 	bool	read_conda_envs()
 	{
+		_arr_conda_envs.clear();
+
 		eString conda_env_file = process.get_env("USERPROFILE");
 		if (conda_env_file.empty()) conda_env_file = process.get_env("HOMEDRIVE") + process.get_env("USERPROFILE");
 		VERIFY(!conda_env_file.empty(), "获取用户文件夹失败!");
 		conda_env_file += "\\.conda\\environments.txt";
 		if (!util::is_file_exists(conda_env_file))
 		{
+			console.warn("没有找到conda虚拟环境文件:{}", conda_env_file);
 			return false;
 		}
+		
+		eString bodyStr=util::read_file(conda_env_file);
+		if (bodyStr.empty())
+		{
+			return true;
+		}
+		bodyStr.replaceAll("\r", "");
+		_arr_conda_envs=bodyStr.split_string("\n", true);
+
+		if (_arr_conda_envs.empty())
+		{
+			console.warn("conda没有安装虚拟环境");
+			return false;
+		}
+
+		return true;
 	}
 
 	//判断是否代理运行
@@ -69,9 +78,16 @@ public:
 	//运行命令
 	void	run()
 	{
+		read_conda_envs();
+
 		do
 		{
-			std::cout << "设置当前目录默认环境变量:\r\n";
+			console.clear();
+			console.log("选择当前目录({})虚拟环境:",process.cwd(true));
+			console.log("");
+			console.printf(_arr_conda_envs, "{} - (conda){}\r\n", 1);
+			console.log("");
+			
 
 		} while (true);
 	}
